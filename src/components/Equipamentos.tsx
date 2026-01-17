@@ -1,10 +1,11 @@
 import { motion } from "framer-motion";
-import { Package, Lightbulb, Tv } from "lucide-react";
+import { Package, Lightbulb, Tv, Speaker } from "lucide-react";
 import gateway from "@/assets/gateway.png";
 import irControl from "@/assets/ir-control.png";
 import switch6 from "@/assets/switch-6-buttons.jpg";
 import switch2 from "@/assets/switch-2-buttons-white.jpg";
 import switch1 from "@/assets/switch-1-button-silver.jpg";
+import alexaEchoDot from "@/assets/alexa-echo-dot.jpg";
 
 const equipamentos = [
   {
@@ -41,6 +42,13 @@ const equipamentos = [
     descricao: "Para ar condicionado e TVs (3 quartos e sala)",
     quantidade: "4 unidades",
     image: irControl,
+  },
+  {
+    icon: Speaker,
+    nome: "Amazon Echo Dot (Brinde)",
+    descricao: "Smart Speaker com Alexa - Som vibrante e potente",
+    quantidade: "1 unidade",
+    image: alexaEchoDot,
   },
 ];
 
