@@ -96,8 +96,6 @@ export const FormContrato = () => {
     // Envia para Google Forms
     await sendToGoogleForms(data);
     
-    console.log("Dados do contrato:", data);
-    
     toast.success("Dados enviados com sucesso!", {
       description: "Suas informações foram salvas. Você receberá contato em breve.",
     });
