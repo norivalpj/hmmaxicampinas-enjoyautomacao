@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
-import { User, Mail, Phone, MapPin, FileText, CheckCircle2, Send, MessageCircle, CreditCard } from "lucide-react";
+import { User, Mail, Phone, MapPin, FileText, CheckCircle2, Send, CreditCard } from "lucide-react";
 
 const formSchema = z.object({
   nome: z.string().min(3, "Nome deve ter pelo menos 3 caracteres").max(100),
@@ -89,42 +89,6 @@ export const FormContrato = () => {
     }
   };
 
-  const notifyViaWhatsApp = (data: FormData) => {
-    const pagamentoLabel = FORMAS_PAGAMENTO.find(p => p.value === data.formaPagamento)?.label || data.formaPagamento;
-    const message = `🔔 *NOVO CADASTRO RECEBIDO*
-
-👤 Cliente: ${data.nome}
-🏢 Apartamento: ${data.apartamento}
-💳 Pagamento: ${pagamentoLabel}
-
-_Verifique o Google Forms para detalhes completos._`;
-
-    const encodedMessage = encodeURIComponent(message);
-    const whatsappNumber = "5519982748275";
-    window.open(`https://wa.me/${whatsappNumber}?text=${encodedMessage}`, "_blank");
-  };
-
-  const sendViaEmail = (data: FormData) => {
-    const pagamentoLabel = FORMAS_PAGAMENTO.find(p => p.value === data.formaPagamento)?.label || data.formaPagamento;
-    const subject = `Novo Contrato - Automação Residencial - ${data.nome}`;
-    const body = `NOVO CONTRATO - AUTOMAÇÃO RESIDENCIAL
-
-Dados do Cliente:
-- Nome: ${data.nome}
-- Email: ${data.email}
-- Telefone: ${data.telefone}
-- CPF: ${data.cpf}
-- Endereço: ${data.endereco}
-- Apartamento: ${data.apartamento}
-- Forma de Pagamento: ${pagamentoLabel}
-
----
-Enviado via Landing Page HM Maxi Campinas`;
-
-    const encodedSubject = encodeURIComponent(subject);
-    const encodedBody = encodeURIComponent(body);
-    window.open(`mailto:contato@enjoyautomacao.com.br?subject=${encodedSubject}&body=${encodedBody}`, "_blank");
-  };
 
   const onSubmit = async (data: FormData) => {
     setIsSubmitting(true);
@@ -132,13 +96,10 @@ Enviado via Landing Page HM Maxi Campinas`;
     // Envia para Google Forms
     await sendToGoogleForms(data);
     
-    // Notifica por WhatsApp (apenas notificação)
-    notifyViaWhatsApp(data);
-    
     console.log("Dados do contrato:", data);
     
     toast.success("Dados enviados com sucesso!", {
-      description: "Suas informações foram salvas no Google Forms.",
+      description: "Suas informações foram salvas. Você receberá contato em breve.",
     });
     
     setIsSuccess(true);
@@ -352,8 +313,7 @@ Enviado via Landing Page HM Maxi Campinas`;
                 <Send className="w-5 h-5 mr-2" />
                 {isSubmitting ? "Enviando..." : "Enviar Dados"}
               </Button>
-              <p className="text-center text-sm text-muted-foreground mt-4 flex items-center justify-center gap-2">
-                <MessageCircle className="w-4 h-4" />
+              <p className="text-center text-sm text-muted-foreground mt-4">
                 Seus dados serão salvos e você receberá contato em breve
               </p>
             </div>
