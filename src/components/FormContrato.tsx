@@ -8,30 +8,48 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 import { User, Mail, Phone, MapPin, FileText, CheckCircle2, Send, CreditCard } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
+
+// CPF validation algorithm
+const validateCPF = (cpf: string): boolean => {
+  const cleanCPF = cpf.replace(/\D/g, '');
+  
+  if (cleanCPF.length !== 11) return false;
+  if (/^(\d)\1{10}$/.test(cleanCPF)) return false;
+  
+  let sum = 0;
+  for (let i = 0; i < 9; i++) {
+    sum += parseInt(cleanCPF[i]) * (10 - i);
+  }
+  let remainder = (sum * 10) % 11;
+  if (remainder === 10 || remainder === 11) remainder = 0;
+  if (remainder !== parseInt(cleanCPF[9])) return false;
+  
+  sum = 0;
+  for (let i = 0; i < 10; i++) {
+    sum += parseInt(cleanCPF[i]) * (11 - i);
+  }
+  remainder = (sum * 10) % 11;
+  if (remainder === 10 || remainder === 11) remainder = 0;
+  if (remainder !== parseInt(cleanCPF[10])) return false;
+  
+  return true;
+};
 
 const formSchema = z.object({
   nome: z.string().min(3, "Nome deve ter pelo menos 3 caracteres").max(100),
   email: z.string().email("Email inválido").max(255),
   telefone: z.string().min(10, "Telefone inválido").max(20),
-  cpf: z.string().min(11, "CPF inválido").max(14),
+  cpf: z.string()
+    .min(11, "CPF inválido")
+    .max(14)
+    .refine((val) => validateCPF(val), { message: "CPF inválido" }),
   endereco: z.string().min(10, "Endereço deve ser completo").max(200),
   apartamento: z.string().min(1, "Informe o número do apartamento").max(10),
   formaPagamento: z.string().min(1, "Selecione uma forma de pagamento"),
 });
 
 type FormData = z.infer<typeof formSchema>;
-
-// Google Forms configuration
-const GOOGLE_FORM_ACTION_URL = "https://docs.google.com/forms/d/e/1FAIpQLSesrhOYxL_shRrO122LPj60suy2VEIOQcyXWVZGMP0IDGtSxg/formResponse";
-const GOOGLE_FORM_FIELDS = {
-  nome: "entry.623372429",
-  email: "entry.1092955177", 
-  telefone: "entry.1960896618",
-  cpf: "entry.133944556",
-  endereco: "entry.193817474",
-  apartamento: "entry.553914424",
-  formaPagamento: "entry.2136262442",
-};
 
 const FORMAS_PAGAMENTO = [
   { value: "R$ 8310,00 - A Vista", label: "À Vista (PIX) - R$ 8.310,00" },
@@ -66,41 +84,42 @@ export const FormContrato = () => {
       .replace(/(\d{5})(\d)/, "$1.$2");
   };
 
-  const sendToGoogleForms = async (data: FormData) => {
-    const formDataObj = new FormData();
-    formDataObj.append(GOOGLE_FORM_FIELDS.nome, data.nome);
-    formDataObj.append(GOOGLE_FORM_FIELDS.email, data.email);
-    formDataObj.append(GOOGLE_FORM_FIELDS.telefone, data.telefone);
-    formDataObj.append(GOOGLE_FORM_FIELDS.cpf, data.cpf);
-    formDataObj.append(GOOGLE_FORM_FIELDS.endereco, data.endereco);
-    formDataObj.append(GOOGLE_FORM_FIELDS.apartamento, data.apartamento);
-    formDataObj.append(GOOGLE_FORM_FIELDS.formaPagamento, data.formaPagamento);
-
+  const submitToServer = async (data: FormData): Promise<{ success: boolean; error?: string }> => {
     try {
-      await fetch(GOOGLE_FORM_ACTION_URL, {
-        method: "POST",
-        body: formDataObj,
-        mode: "no-cors",
+      const { data: response, error } = await supabase.functions.invoke('submit-contract', {
+        body: data
       });
-      return true;
+
+      if (error) {
+        return { success: false, error: error.message || 'Erro ao enviar dados' };
+      }
+
+      if (response?.error) {
+        return { success: false, error: response.error };
+      }
+
+      return { success: true };
     } catch (error) {
-      console.error("Erro ao enviar para Google Forms:", error);
-      return false;
+      return { success: false, error: 'Erro de conexão. Por favor, tente novamente.' };
     }
   };
-
 
   const onSubmit = async (data: FormData) => {
     setIsSubmitting(true);
     
-    // Envia para Google Forms
-    await sendToGoogleForms(data);
+    const result = await submitToServer(data);
     
-    toast.success("Dados enviados com sucesso!", {
-      description: "Suas informações foram salvas. Você receberá contato em breve.",
-    });
+    if (result.success) {
+      toast.success("Dados enviados com sucesso!", {
+        description: "Suas informações foram salvas. Você receberá contato em breve.",
+      });
+      setIsSuccess(true);
+    } else {
+      toast.error("Erro ao enviar dados", {
+        description: result.error || "Por favor, verifique os dados e tente novamente.",
+      });
+    }
     
-    setIsSuccess(true);
     setIsSubmitting(false);
   };
 
