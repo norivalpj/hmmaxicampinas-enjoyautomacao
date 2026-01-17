@@ -1,5 +1,6 @@
 import { motion } from "framer-motion";
 import logo from "@/assets/logo-full.png";
+import logoHmMaxi from "@/assets/logo-hm-maxi.jpg";
 import { Button } from "@/components/ui/button";
 import { ChevronDown } from "lucide-react";
 
@@ -23,14 +24,21 @@ export const Hero = () => {
         transition={{ duration: 0.8 }}
         className="relative z-10 text-center max-w-4xl mx-auto"
       >
-        <motion.img
-          src={logo}
-          alt="Enjoy Automação"
-          className="h-24 md:h-32 mx-auto mb-8"
+        {/* Logo com fundo destacado */}
+        <motion.div
           initial={{ scale: 0.8, opacity: 0 }}
           animate={{ scale: 1, opacity: 1 }}
           transition={{ delay: 0.2, duration: 0.6 }}
-        />
+          className="mb-8"
+        >
+          <div className="inline-block p-4 rounded-2xl bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-sm border border-white/20 shadow-lg shadow-primary/20">
+            <img
+              src={logo}
+              alt="Enjoy Automação"
+              className="h-20 md:h-28"
+            />
+          </div>
+        </motion.div>
 
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -64,14 +72,22 @@ export const Hero = () => {
           Exclusivo para moradores do
         </motion.p>
 
-        <motion.h2
+        {/* HM Maxi com logo */}
+        <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.7, duration: 0.6 }}
-          className="font-display text-2xl md:text-4xl font-semibold mb-10 gradient-text"
+          className="flex items-center justify-center gap-4 mb-10"
         >
-          HM Maxi Campinas
-        </motion.h2>
+          <img
+            src={logoHmMaxi}
+            alt="HM Maxi Campinas"
+            className="h-16 md:h-20 rounded-lg shadow-lg"
+          />
+          <h2 className="font-display text-2xl md:text-4xl font-semibold gradient-text">
+            HM Maxi Campinas
+          </h2>
+        </motion.div>
 
         <motion.div
           initial={{ opacity: 0, y: 20 }}
