@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
-import { CreditCard, User, Mail, Phone, MapPin, FileText, CheckCircle2 } from "lucide-react";
+import { User, Mail, Phone, MapPin, FileText, CheckCircle2, Send, MessageCircle } from "lucide-react";
 
 const formSchema = z.object({
   nome: z.string().min(3, "Nome deve ter pelo menos 3 caracteres").max(100),
@@ -48,23 +48,63 @@ export const FormContrato = () => {
       .replace(/(\d{5})(\d)/, "$1.$2");
   };
 
+  const sendViaWhatsApp = (data: FormData) => {
+    const message = `🏠 *NOVO CONTRATO - AUTOMAÇÃO RESIDENCIAL*
+
+📋 *Dados do Cliente:*
+👤 Nome: ${data.nome}
+📧 Email: ${data.email}
+📱 Telefone: ${data.telefone}
+🆔 CPF: ${data.cpf}
+📍 Endereço: ${data.endereco}
+🏢 Apartamento: ${data.apartamento}
+
+---
+_Enviado via Landing Page HM Maxi Campinas_`;
+
+    const encodedMessage = encodeURIComponent(message);
+    const whatsappNumber = "5519982748275";
+    window.open(`https://wa.me/${whatsappNumber}?text=${encodedMessage}`, "_blank");
+  };
+
+  const sendViaEmail = (data: FormData) => {
+    const subject = `Novo Contrato - Automação Residencial - ${data.nome}`;
+    const body = `NOVO CONTRATO - AUTOMAÇÃO RESIDENCIAL
+
+Dados do Cliente:
+- Nome: ${data.nome}
+- Email: ${data.email}
+- Telefone: ${data.telefone}
+- CPF: ${data.cpf}
+- Endereço: ${data.endereco}
+- Apartamento: ${data.apartamento}
+
+---
+Enviado via Landing Page HM Maxi Campinas`;
+
+    const encodedSubject = encodeURIComponent(subject);
+    const encodedBody = encodeURIComponent(body);
+    window.open(`mailto:contato@enjoyautomacao.com.br?subject=${encodedSubject}&body=${encodedBody}`, "_blank");
+  };
+
   const onSubmit = async (data: FormData) => {
     setIsSubmitting(true);
     
-    // Simula envio e redireciona para InfinitePay
-    await new Promise((resolve) => setTimeout(resolve, 1500));
+    // Simula processamento
+    await new Promise((resolve) => setTimeout(resolve, 500));
     
     console.log("Dados do contrato:", data);
     
-    toast.success("Dados recebidos! Redirecionando para pagamento...", {
-      description: "Você será direcionado para a página de pagamento seguro.",
+    // Envia por ambos os canais
+    sendViaWhatsApp(data);
+    sendViaEmail(data);
+    
+    toast.success("Dados enviados com sucesso!", {
+      description: "Suas informações foram enviadas por WhatsApp e Email.",
     });
     
     setIsSuccess(true);
     setIsSubmitting(false);
-    
-    // Aqui você pode integrar com InfinitePay
-    // window.location.href = "URL_DO_INFINITEPAY";
   };
 
   if (isSuccess) {
@@ -81,8 +121,8 @@ export const FormContrato = () => {
             </div>
             <h3 className="font-display text-2xl font-bold mb-4">Cadastro Realizado!</h3>
             <p className="text-muted-foreground mb-6">
-              Seus dados foram recebidos com sucesso. Em breve você receberá as instruções 
-              de pagamento pelo email informado.
+              Seus dados foram enviados com sucesso por WhatsApp e Email. 
+              Em breve entraremos em contato para finalizar seu contrato!
             </p>
             <Button
               onClick={() => {
@@ -119,7 +159,7 @@ export const FormContrato = () => {
             <span className="gradient-text">automação</span>
           </h2>
           <p className="text-muted-foreground text-lg max-w-2xl mx-auto">
-            Preencha seus dados para o contrato e realize o pagamento online de forma segura
+            Preencha seus dados e entraremos em contato para finalizar seu contrato
           </p>
         </motion.div>
 
@@ -245,11 +285,12 @@ export const FormContrato = () => {
                 disabled={isSubmitting}
                 className="w-full bg-primary hover:bg-primary/90 text-primary-foreground font-semibold py-6 text-lg button-glow"
               >
-                <CreditCard className="w-5 h-5 mr-2" />
-                {isSubmitting ? "Processando..." : "Continuar para Pagamento"}
+                <Send className="w-5 h-5 mr-2" />
+                {isSubmitting ? "Enviando..." : "Enviar Dados"}
               </Button>
-              <p className="text-center text-sm text-muted-foreground mt-4">
-                Pagamento seguro via InfinitePay • Parcelamento disponível
+              <p className="text-center text-sm text-muted-foreground mt-4 flex items-center justify-center gap-2">
+                <MessageCircle className="w-4 h-4" />
+                Seus dados serão enviados por WhatsApp e Email
               </p>
             </div>
           </form>
