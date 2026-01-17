@@ -20,6 +20,17 @@ const formSchema = z.object({
 
 type FormData = z.infer<typeof formSchema>;
 
+// Google Forms configuration
+const GOOGLE_FORM_ACTION_URL = "https://docs.google.com/forms/d/e/1FAIpQLSesrhOYxL_shRrO122LPj60suy2VEIOQcyXWVZGMP0IDGtSxg/formResponse";
+const GOOGLE_FORM_FIELDS = {
+  nome: "entry.2005620554",
+  email: "entry.1045781291", 
+  telefone: "entry.1166974658",
+  cpf: "entry.839337160",
+  endereco: "entry.1065046570",
+  apartamento: "entry.1166685982",
+};
+
 export const FormContrato = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
@@ -48,19 +59,35 @@ export const FormContrato = () => {
       .replace(/(\d{5})(\d)/, "$1.$2");
   };
 
-  const sendViaWhatsApp = (data: FormData) => {
-    const message = `🏠 *NOVO CONTRATO - AUTOMAÇÃO RESIDENCIAL*
+  const sendToGoogleForms = async (data: FormData) => {
+    const formData = new FormData();
+    formData.append(GOOGLE_FORM_FIELDS.nome, data.nome);
+    formData.append(GOOGLE_FORM_FIELDS.email, data.email);
+    formData.append(GOOGLE_FORM_FIELDS.telefone, data.telefone);
+    formData.append(GOOGLE_FORM_FIELDS.cpf, data.cpf);
+    formData.append(GOOGLE_FORM_FIELDS.endereco, data.endereco);
+    formData.append(GOOGLE_FORM_FIELDS.apartamento, data.apartamento);
 
-📋 *Dados do Cliente:*
-👤 Nome: ${data.nome}
-📧 Email: ${data.email}
-📱 Telefone: ${data.telefone}
-🆔 CPF: ${data.cpf}
-📍 Endereço: ${data.endereco}
+    try {
+      await fetch(GOOGLE_FORM_ACTION_URL, {
+        method: "POST",
+        body: formData,
+        mode: "no-cors",
+      });
+      return true;
+    } catch (error) {
+      console.error("Erro ao enviar para Google Forms:", error);
+      return false;
+    }
+  };
+
+  const notifyViaWhatsApp = (data: FormData) => {
+    const message = `🔔 *NOVO CADASTRO RECEBIDO*
+
+👤 Cliente: ${data.nome}
 🏢 Apartamento: ${data.apartamento}
 
----
-_Enviado via Landing Page HM Maxi Campinas_`;
+_Verifique o Google Forms para detalhes completos._`;
 
     const encodedMessage = encodeURIComponent(message);
     const whatsappNumber = "5519982748275";
@@ -90,17 +117,19 @@ Enviado via Landing Page HM Maxi Campinas`;
   const onSubmit = async (data: FormData) => {
     setIsSubmitting(true);
     
-    // Simula processamento
-    await new Promise((resolve) => setTimeout(resolve, 500));
+    // Envia para Google Forms
+    await sendToGoogleForms(data);
+    
+    // Envia por email
+    sendViaEmail(data);
+    
+    // Notifica por WhatsApp (apenas notificação)
+    notifyViaWhatsApp(data);
     
     console.log("Dados do contrato:", data);
     
-    // Envia por ambos os canais
-    sendViaWhatsApp(data);
-    sendViaEmail(data);
-    
     toast.success("Dados enviados com sucesso!", {
-      description: "Suas informações foram enviadas por WhatsApp e Email.",
+      description: "Suas informações foram salvas no Google Forms e enviadas por Email.",
     });
     
     setIsSuccess(true);
@@ -121,7 +150,7 @@ Enviado via Landing Page HM Maxi Campinas`;
             </div>
             <h3 className="font-display text-2xl font-bold mb-4">Cadastro Realizado!</h3>
             <p className="text-muted-foreground mb-6">
-              Seus dados foram enviados com sucesso por WhatsApp e Email. 
+              Seus dados foram salvos com sucesso. 
               Em breve entraremos em contato para finalizar seu contrato!
             </p>
             <Button
@@ -290,7 +319,7 @@ Enviado via Landing Page HM Maxi Campinas`;
               </Button>
               <p className="text-center text-sm text-muted-foreground mt-4 flex items-center justify-center gap-2">
                 <MessageCircle className="w-4 h-4" />
-                Seus dados serão enviados por WhatsApp e Email
+                Seus dados serão salvos e você receberá contato em breve
               </p>
             </div>
           </form>
