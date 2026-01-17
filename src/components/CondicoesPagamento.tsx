@@ -148,6 +148,19 @@ export const CondicoesPagamento = () => {
             </motion.div>
           ))}
         </div>
+
+        {/* Validade */}
+        <motion.div
+          initial={{ opacity: 0 }}
+          whileInView={{ opacity: 1 }}
+          viewport={{ once: true }}
+          transition={{ delay: 0.3, duration: 0.6 }}
+          className="text-center mt-8"
+        >
+          <p className="text-muted-foreground text-sm">
+            <span className="font-semibold text-primary">Validade:</span> 27/02/2026
+          </p>
+        </motion.div>
       </div>
     </section>
   );

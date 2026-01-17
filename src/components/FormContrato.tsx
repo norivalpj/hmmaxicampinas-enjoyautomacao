@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
-import { User, Mail, Phone, MapPin, FileText, CheckCircle2, Send, MessageCircle } from "lucide-react";
+import { User, Mail, Phone, MapPin, FileText, CheckCircle2, Send, MessageCircle, CreditCard } from "lucide-react";
 
 const formSchema = z.object({
   nome: z.string().min(3, "Nome deve ter pelo menos 3 caracteres").max(100),
@@ -16,6 +16,7 @@ const formSchema = z.object({
   cpf: z.string().min(11, "CPF inválido").max(14),
   endereco: z.string().min(10, "Endereço deve ser completo").max(200),
   apartamento: z.string().min(1, "Informe o número do apartamento").max(10),
+  formaPagamento: z.string().min(1, "Selecione uma forma de pagamento"),
 });
 
 type FormData = z.infer<typeof formSchema>;
@@ -29,7 +30,13 @@ const GOOGLE_FORM_FIELDS = {
   cpf: "entry.133944556",
   endereco: "entry.193817474",
   apartamento: "entry.553914424",
+  formaPagamento: "entry.2136262442",
 };
+
+const FORMAS_PAGAMENTO = [
+  { value: "R$ 8310,00 - A Vista", label: "À Vista (PIX) - R$ 8.310,00" },
+  { value: "R$ 8749,00 - Entrada PIX (R$ 4374,50) + Saldo Parcelado até 6x", label: "Parcelado - R$ 8.749,00 (R$ 4.374,50 PIX + 6x R$ 729,09)" },
+];
 
 export const FormContrato = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -60,18 +67,19 @@ export const FormContrato = () => {
   };
 
   const sendToGoogleForms = async (data: FormData) => {
-    const formData = new FormData();
-    formData.append(GOOGLE_FORM_FIELDS.nome, data.nome);
-    formData.append(GOOGLE_FORM_FIELDS.email, data.email);
-    formData.append(GOOGLE_FORM_FIELDS.telefone, data.telefone);
-    formData.append(GOOGLE_FORM_FIELDS.cpf, data.cpf);
-    formData.append(GOOGLE_FORM_FIELDS.endereco, data.endereco);
-    formData.append(GOOGLE_FORM_FIELDS.apartamento, data.apartamento);
+    const formDataObj = new FormData();
+    formDataObj.append(GOOGLE_FORM_FIELDS.nome, data.nome);
+    formDataObj.append(GOOGLE_FORM_FIELDS.email, data.email);
+    formDataObj.append(GOOGLE_FORM_FIELDS.telefone, data.telefone);
+    formDataObj.append(GOOGLE_FORM_FIELDS.cpf, data.cpf);
+    formDataObj.append(GOOGLE_FORM_FIELDS.endereco, data.endereco);
+    formDataObj.append(GOOGLE_FORM_FIELDS.apartamento, data.apartamento);
+    formDataObj.append(GOOGLE_FORM_FIELDS.formaPagamento, data.formaPagamento);
 
     try {
       await fetch(GOOGLE_FORM_ACTION_URL, {
         method: "POST",
-        body: formData,
+        body: formDataObj,
         mode: "no-cors",
       });
       return true;
@@ -82,10 +90,12 @@ export const FormContrato = () => {
   };
 
   const notifyViaWhatsApp = (data: FormData) => {
+    const pagamentoLabel = FORMAS_PAGAMENTO.find(p => p.value === data.formaPagamento)?.label || data.formaPagamento;
     const message = `🔔 *NOVO CADASTRO RECEBIDO*
 
 👤 Cliente: ${data.nome}
 🏢 Apartamento: ${data.apartamento}
+💳 Pagamento: ${pagamentoLabel}
 
 _Verifique o Google Forms para detalhes completos._`;
 
@@ -95,6 +105,7 @@ _Verifique o Google Forms para detalhes completos._`;
   };
 
   const sendViaEmail = (data: FormData) => {
+    const pagamentoLabel = FORMAS_PAGAMENTO.find(p => p.value === data.formaPagamento)?.label || data.formaPagamento;
     const subject = `Novo Contrato - Automação Residencial - ${data.nome}`;
     const body = `NOVO CONTRATO - AUTOMAÇÃO RESIDENCIAL
 
@@ -105,6 +116,7 @@ Dados do Cliente:
 - CPF: ${data.cpf}
 - Endereço: ${data.endereco}
 - Apartamento: ${data.apartamento}
+- Forma de Pagamento: ${pagamentoLabel}
 
 ---
 Enviado via Landing Page HM Maxi Campinas`;
@@ -303,6 +315,32 @@ Enviado via Landing Page HM Maxi Campinas`;
                 />
                 {errors.apartamento && (
                   <p className="text-destructive text-sm">{errors.apartamento.message}</p>
+                )}
+              </div>
+
+              <div className="space-y-2 md:col-span-2">
+                <Label htmlFor="formaPagamento" className="flex items-center gap-2">
+                  <CreditCard className="w-4 h-4 text-primary" />
+                  Forma de Pagamento
+                </Label>
+                <div className="space-y-3">
+                  {FORMAS_PAGAMENTO.map((opcao) => (
+                    <label
+                      key={opcao.value}
+                      className="flex items-center gap-3 p-4 rounded-lg bg-secondary/50 border border-border/50 cursor-pointer hover:border-primary/50 transition-colors"
+                    >
+                      <input
+                        type="radio"
+                        value={opcao.value}
+                        {...register("formaPagamento")}
+                        className="w-4 h-4 text-primary accent-primary"
+                      />
+                      <span className="text-sm">{opcao.label}</span>
+                    </label>
+                  ))}
+                </div>
+                {errors.formaPagamento && (
+                  <p className="text-destructive text-sm">{errors.formaPagamento.message}</p>
                 )}
               </div>
             </div>
