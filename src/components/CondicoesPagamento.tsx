@@ -4,22 +4,18 @@ import { CreditCard, Percent, Banknote, Gift, Sparkles } from "lucide-react";
 export const CondicoesPagamento = () => {
   const condicoes = [
     {
-      icon: Banknote,
-      titulo: "Entrada",
-      descricao: "50% no fechamento do contrato",
-      destaque: false,
+      icon: Percent,
+      titulo: "À Vista (PIX)",
+      valor: "R$ 8.310,00",
+      descricao: "5% de desconto",
+      destaque: true,
     },
     {
       icon: CreditCard,
       titulo: "Parcelado",
-      descricao: "Saldo em até 6x no cartão",
+      valor: "R$ 8.749,00",
+      descricao: "R$ 4.374,50 (PIX) + 6x de R$ 729,09",
       destaque: false,
-    },
-    {
-      icon: Percent,
-      titulo: "À Vista (PIX)",
-      descricao: "5% de desconto",
-      destaque: true,
     },
   ];
 
@@ -110,7 +106,7 @@ export const CondicoesPagamento = () => {
         </motion.div>
 
         {/* Cards de Condições */}
-        <div className="grid md:grid-cols-3 gap-6">
+        <div className="grid md:grid-cols-2 gap-6 max-w-3xl mx-auto">
           {condicoes.map((condicao, index) => (
             <motion.div
               key={condicao.titulo}
@@ -135,16 +131,18 @@ export const CondicoesPagamento = () => {
                   ? "bg-primary/20"
                   : "bg-secondary"
               }`}>
-                <condicao.icon className={`w-8 h-8 ${
-                  condicao.destaque ? "text-primary" : "text-primary"
-                }`} />
+                <condicao.icon className={`w-8 h-8 text-primary`} />
               </div>
               
               <h3 className="font-display text-xl font-bold mb-2">
                 {condicao.titulo}
               </h3>
               
-              <p className="text-muted-foreground">
+              <p className="text-2xl font-bold text-primary mb-2">
+                {condicao.valor}
+              </p>
+              
+              <p className="text-muted-foreground text-sm">
                 {condicao.descricao}
               </p>
             </motion.div>

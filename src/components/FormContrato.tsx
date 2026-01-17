@@ -23,12 +23,12 @@ type FormData = z.infer<typeof formSchema>;
 // Google Forms configuration
 const GOOGLE_FORM_ACTION_URL = "https://docs.google.com/forms/d/e/1FAIpQLSesrhOYxL_shRrO122LPj60suy2VEIOQcyXWVZGMP0IDGtSxg/formResponse";
 const GOOGLE_FORM_FIELDS = {
-  nome: "entry.2005620554",
-  email: "entry.1045781291", 
-  telefone: "entry.1166974658",
-  cpf: "entry.839337160",
-  endereco: "entry.1065046570",
-  apartamento: "entry.1166685982",
+  nome: "entry.623372429",
+  email: "entry.1092955177", 
+  telefone: "entry.1960896618",
+  cpf: "entry.133944556",
+  endereco: "entry.193817474",
+  apartamento: "entry.553914424",
 };
 
 export const FormContrato = () => {
