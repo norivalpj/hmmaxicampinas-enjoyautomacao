@@ -127,7 +127,17 @@ serve(async (req) => {
     }
 
     const body = await req.json();
-    const { nome, email, telefone, cpf, endereco, apartamento, formaPagamento } = body;
+    const { nome, email, telefone, cpf, endereco, apartamento, formaPagamento, website } = body;
+
+    // Honeypot field detection - bots will fill this hidden field
+    if (website && website.trim().length > 0) {
+      console.log('Honeypot triggered - likely bot submission');
+      // Return success to not alert the bot, but don't process
+      return new Response(
+        JSON.stringify({ success: true, message: 'Dados enviados com sucesso' }),
+        { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
 
     // Validate required fields
     const errors: string[] = [];

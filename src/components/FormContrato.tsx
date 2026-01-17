@@ -84,10 +84,13 @@ export const FormContrato = () => {
       .replace(/(\d{5})(\d)/, "$1.$2");
   };
 
-  const submitToServer = async (data: FormData): Promise<{ success: boolean; error?: string }> => {
+  const submitToServer = async (data: FormData & { website?: string }): Promise<{ success: boolean; error?: string }> => {
     try {
       const { data: response, error } = await supabase.functions.invoke('submit-contract', {
-        body: data
+        body: {
+          ...data,
+          website: (document.getElementById('website') as HTMLInputElement)?.value || ''
+        }
       });
 
       if (error) {
@@ -187,6 +190,17 @@ export const FormContrato = () => {
           className="card-premium rounded-2xl p-8"
         >
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+            {/* Honeypot field - hidden from users, bots will fill it */}
+            <div className="absolute -left-[9999px]" aria-hidden="true">
+              <input
+                type="text"
+                id="website"
+                name="website"
+                tabIndex={-1}
+                autoComplete="off"
+              />
+            </div>
+            
             <div className="grid md:grid-cols-2 gap-6">
               <div className="space-y-2">
                 <Label htmlFor="nome" className="flex items-center gap-2">
