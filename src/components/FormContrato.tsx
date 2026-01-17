@@ -132,16 +132,13 @@ Enviado via Landing Page HM Maxi Campinas`;
     // Envia para Google Forms
     await sendToGoogleForms(data);
     
-    // Envia por email
-    sendViaEmail(data);
-    
     // Notifica por WhatsApp (apenas notificação)
     notifyViaWhatsApp(data);
     
     console.log("Dados do contrato:", data);
     
     toast.success("Dados enviados com sucesso!", {
-      description: "Suas informações foram salvas no Google Forms e enviadas por Email.",
+      description: "Suas informações foram salvas no Google Forms.",
     });
     
     setIsSuccess(true);
